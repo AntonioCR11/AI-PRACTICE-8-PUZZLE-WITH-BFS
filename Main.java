@@ -1,215 +1,202 @@
 import java.util.Scanner;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Main{
+
     public static void main(String[] args) throws FileNotFoundException {
         ReadFile reader = new ReadFile();
+
+        String[] color = {"\u001b[31m","\u001b[32m","\u001b[34m","\u001b[35m"};
+        String reset = "\u001b[0m";    
+
         reader.loadInputs("start","goal");
+        reader.printStates();
 
         /*
-            BFS Algorithm with open and closed list/queue
-            1.	Begin
-            2.	Open = [start];
-            3.	Closed =[];
-            4.	While open != [] do
-            5.	Begin
-            6.	Remove leftmost state from open call it x;
-            7.	If x is a goal then return success
-            8.	Else
-            9.	Begin
-            10.	Generate children of x;
-            11.	Put x on closed;
-            12.	Put children on right end of open;
-            13.	End
-            14.	End
-            15.	Return(failure)
-            16.	End
+        BFS Algorithm with open and closed list/queue
+        1.	Begin
+        2.	Open = [start];
+        3.	Closed =[];
+        4.	While open != [] do
+        5.	Begin
+        6.	Remove leftmost state from open call it x;
+        7.	If x is a goal then return success
+        8.	Else
+        9.	Begin
+        10.	Generate children of x;
+        11.	Put x on closed;
+        12.	Put children on right end of open;
+        13.	End
+        14.	End
+        15.	Return(failure)
+        16.	End 
         */
 
         // Initialize Component
         Queue<State> openList = new LinkedList<State>();
         Queue<State> closedList = new LinkedList<State>();
-        
-        int depth=1,idState=1;
-        int[][] currentState = new int[3][3];
-        int[][] goalState = reader.getGoalState();
+        ArrayList<State> answer = new ArrayList<>();
 
+        int idState=1;
+        String currentState = "";
+        String goalState = reader.getGoalState();
+        
         // Insert start state to Open
-        openList.add(new State(depth, idState ,0, reader.getStartState()));
+        openList.add(new State(idState ,0, reader.getStartState()));
 
         // Main program
         while(!openList.isEmpty()){
             currentState = openList.peek().getState();
-            int currentId = openList.peek().getIdState();
-            int parentId = openList.peek().getParent();
 
             // Remove leftmost state from open call it x
             State xState = openList.remove();
 
-            System.out.println("CURRENT STATE : "+currentId+" CHILD OF : "+parentId);
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    System.out.print(currentState[i][j]+" ");
+            // Check if current state is the solution
+            if(currentState.equalsIgnoreCase(goalState)){
+                // Search parent history
+                int currentParent = xState.parent;
+                answer.add(xState);
+                while(currentParent != 0){
+                    for(State closedState : closedList) {
+                        if(closedState.idState == currentParent){
+                            answer.add(closedState);
+                            currentParent = closedState.parent;
+                            break;
+                        }
+                    }
                 }
-                System.out.print("| ");
-                for (int j = 0; j < 3; j++) {
-                    System.out.print(goalState[i][j]+" ");
+                // Print Solution
+                for (int i = answer.size()-1; i >= 0; i--) {
+                    for (int j = 0; j < 3; j++) {
+                        System.out.print("| ");
+                        for (int k = 0; k < 3; k++) {
+                            if(answer.get(i).getState().substring(3*j+k, (3*j+k)+1).equalsIgnoreCase("0")){
+                                System.out.print(color[2]);
+                                System.out.print(answer.get(i).getState().substring(3*j+k, (3*j+k)+1)+" ");
+                                System.out.print(reset); 
+                            }else{System.out.print(answer.get(i).getState().substring(3*j+k, (3*j+k)+1)+" ");}
+                        }
+                        System.out.print("| ");
+                        for (int k = 0; k < 3; k++) {
+                            System.out.print(goalState.substring(3*j+k, (3*j+k)+1)+" ");
+                        }
+                        System.out.println("|");
+                    }
+                    System.out.println("-----------------");
                 }
-                System.out.println();
-            }
-            System.out.println("---------------------");
-
-            if(Arrays.deepEquals(currentState, goalState)){
-                // Check if current state is the solution
+                
                 System.out.println("Solution Found!");
                 break;
             }
             else{
+                // If the solution not yet found
                 // Expand to search the child of current state (blank move up,down,left,right)
-                depth++;
 
                 // Get blank postion 
-                int yPos=0,xPos=0;
-                for (int i = 0; i < 3; i++) {
-                    for (int j = 0; j < 3; j++) {
-                        if(currentState[i][j] == 0){
-                            yPos = i;
-                            xPos = j;
-                            break;
-                        }
-                    }
-                }
+                int blankPos = currentState.indexOf('0');
                 
                 // Move left
-                if(xPos!=0){
-                    int[][] newState = new int[3][3];
+                if(blankPos != 0 && blankPos != 3 && blankPos != 6){
+                    // if blank position is not on the leftmost column
+                    String newState = currentState;
                     boolean recurring = false;
-                    for (int i = 0; i < 3; i++) {
-                        for (int j = 0; j < 3; j++) {
-                            newState[i][j] = currentState[i][j];
-                        }
-                    }
                     idState++;
 
-                    int temp = newState[yPos][xPos-1];
-                    newState[yPos][xPos-1] = newState[yPos][xPos];
-                    newState[yPos][xPos] = temp;
+                    // Swap blank
+                    newState = currentState.substring(0,blankPos-1)+"0"+currentState.charAt(blankPos-1)+currentState.substring(blankPos+1);
                     
-                    // Put x on closed
-                    if(!closedList.contains(xState)){
-                        closedList.add(xState);
-                    }
-                    // check if recurring
+                    // Check recurring
                     for(State closedState : closedList) {
-                        if(Arrays.deepEquals(newState, closedState.state)){
+                        if(newState.equalsIgnoreCase(closedState.state)){
                             recurring = true;
                             break;
                         }
                     }
+                    // Put x on closed                    
                     // Put children on right end of open
                     if(!recurring){
-                        openList.add(new State(depth, idState ,xState.getIdState(), newState));
+                        closedList.add(xState);
+                        openList.add(new State(idState ,xState.getIdState(), newState));
                     }
                 }
 
                 // Move right
-                if(xPos!=2){
-                    int[][] newState = new int[3][3];
+                if(blankPos != 2 && blankPos != 5 && blankPos != 8){
+                    // if blank position is not on the leftmost column
+                    String newState = currentState;
                     boolean recurring = false;
-                    for (int i = 0; i < 3; i++) {
-                        for (int j = 0; j < 3; j++) {
-                            newState[i][j] = currentState[i][j];
-                        }
-                    }
                     idState++;
 
-                    int temp = newState[yPos][xPos+1];
-                    newState[yPos][xPos+1] = newState[yPos][xPos];
-                    newState[yPos][xPos] = temp;
+                    // Swap blank
+                    newState = currentState.substring(0,blankPos)+currentState.charAt(blankPos+1)+"0"+currentState.substring(blankPos+2);
                     
-                    // Put x on closed
-                    if(!closedList.contains(xState)){
-                        closedList.add(xState);
-                    }
-
-                    // check if recurring
+                    // Check recurring
                     for(State closedState : closedList) {
-                        if(Arrays.deepEquals(newState, closedState.state)){
+                        if(newState.equalsIgnoreCase(closedState.state)){
                             recurring = true;
                             break;
                         }
                     }
+                    // Put x on closed                    
                     // Put children on right end of open
                     if(!recurring){
-                        openList.add(new State(depth, idState ,xState.getIdState(), newState));
+                        closedList.add(xState);
+                        openList.add(new State(idState ,xState.getIdState(), newState));
                     }
                 }
                                
                 // Move up
-                if(yPos!=0){
-                    int[][] newState = new int[3][3];
+                if(blankPos != 0 && blankPos != 1 && blankPos != 2){
+                    // if blank position is not on the leftmost column
+                    String newState = currentState;
                     boolean recurring = false;
-                    for (int i = 0; i < 3; i++) {
-                        for (int j = 0; j < 3; j++) {
-                            newState[i][j] = currentState[i][j];
-                        }
-                    }
                     idState++;
 
-                    int temp = newState[yPos-1][xPos];
-                    newState[yPos-1][xPos] = newState[yPos][xPos];
-                    newState[yPos][xPos] = temp;
+                    // Swap blank
+                    newState = currentState.substring(0,blankPos-3)+"0"+currentState.substring(blankPos-2,blankPos)+currentState.charAt(blankPos-3)+currentState.substring(blankPos+1);
                     
-                    // Put x on closed
-                    if(!closedList.contains(xState)){
-                        closedList.add(xState);
-                    }
-                    // check if recurring
+                    // Check recurring                 
                     for(State closedState : closedList) {
-                        if(Arrays.deepEquals(newState, closedState.state)){
+                        if(newState.equalsIgnoreCase(closedState.state)){
                             recurring = true;
                             break;
                         }
                     }
+
+                    // Put x on closed   
                     // Put children on right end of open
                     if(!recurring){
-                        openList.add(new State(depth, idState ,xState.getIdState(), newState));
+                        closedList.add(xState);
+                        openList.add(new State(idState ,xState.getIdState(), newState));
                     }
                 }
                 
                 // Move down
-                if(yPos!=2){
-                    int[][] newState = new int[3][3];
+                if(blankPos != 6 && blankPos != 7 && blankPos != 8){
+                    // if blank position is not on the leftmost column
+                    String newState = currentState;
                     boolean recurring = false;
-                    for (int i = 0; i < 3; i++) {
-                        for (int j = 0; j < 3; j++) {
-                            newState[i][j] = currentState[i][j];
-                        }
-                    }
                     idState++;
 
-                    int temp = newState[yPos+1][xPos];
-                    newState[yPos+1][xPos] = newState[yPos][xPos];
-                    newState[yPos][xPos] = temp;
+                    // Swap blank
+                    newState = currentState.substring(0,blankPos)+currentState.substring(blankPos+3,blankPos+4)+currentState.substring(blankPos+1,blankPos+3)+"0"+currentState.substring(blankPos+4);
                     
-                    // Put x on closed
-                    if(!closedList.contains(xState)){
-                        closedList.add(xState);
-                    }
-
-                    // check if recurring
+                    // Check recurring
                     for(State closedState : closedList) {
-                        if(Arrays.deepEquals(newState, closedState.state)){
+                        if(newState.equalsIgnoreCase(closedState.state)){
                             recurring = true;
                             break;
                         }
                     }
+                    // Put x on closed                    
                     // Put children on right end of open
                     if(!recurring){
-                        openList.add(new State(depth, idState ,xState.getIdState(), newState));
+                        closedList.add(xState);
+                        openList.add(new State(idState ,xState.getIdState(), newState));
                     }
                 }
             

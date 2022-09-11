@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 public class ReadFile {
     // RETURN GOAL STATE KE MAIN
-    protected int[][] startState = new int[3][3];
-    protected int[][] goalState = new int[3][3];
+    protected String startState = "";
+    protected String goalState = "";
 
     // LOAD INPUT DATA
     public void loadInputs(String start_filename,String goal_filename) throws FileNotFoundException{
@@ -28,10 +28,8 @@ public class ReadFile {
             goal_inputs.add(goal_scanner.nextLine());
         }
         for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                startState[i][j] = Integer.parseInt(start_inputs.get(i).substring(j, j+1));
-                goalState[i][j] = Integer.parseInt(goal_inputs.get(i).substring(j, j+1));
-            }
+            startState += start_inputs.get(i);
+            goalState += goal_inputs.get(i);
         }
     }
 
@@ -42,11 +40,11 @@ public class ReadFile {
         for (int i = 0; i < 3; i++) {
             System.out.print("| ");
             for (int j = 0; j < 3; j++) {
-                System.out.print(startState[i][j]+" ");
+                System.out.print(startState.substring(3*i+j, (3*i+j)+1)+" ");
             }
             System.out.print("| ");
             for (int j = 0; j < 3; j++) {
-                System.out.print(goalState[i][j]+" ");
+                System.out.print(goalState.substring(3*i+j, (3*i+j)+1)+" ");
             }
             System.out.println("|");
         }
@@ -54,20 +52,21 @@ public class ReadFile {
     }
     
     // GETTER SETTER
-    public int[][] getStartState() {
+    public String getStartState() {
         return this.startState;
     }
 
-    public void setStartState(int[][] startState) {
+    public void setStartState(String startState) {
         this.startState = startState;
     }
 
-    public int[][] getGoalState() {
+    public String getGoalState() {
         return this.goalState;
     }
 
-    public void setGoalState(int[][] goalState) {
+    public void setGoalState(String goalState) {
         this.goalState = goalState;
     }
+
 
 }
