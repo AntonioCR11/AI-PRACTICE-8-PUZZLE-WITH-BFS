@@ -17,28 +17,28 @@ public class Main{
         reader.printStates();
 
         /*
-        BFS Algorithm with open and closed list/queue
-        1.	Begin
-        2.	Open = [start];
-        3.	Closed =[];
-        4.	While open != [] do
-        5.	Begin
-        6.	Remove leftmost state from open call it x;
-        7.	If x is a goal then return success
-        8.	Else
-        9.	Begin
-        10.	Generate children of x;
-        11.	Put x on closed;
-        12.	Put children on right end of open;
-        13.	End
-        14.	End
-        15.	Return(failure)
-        16.	End 
+            BFS Algorithm with open and closed list/queue
+            1.	Begin
+            2.	Open = [start];
+            3.	Closed =[];
+            4.	While open != [] do
+            5.	Begin
+            6.	Remove leftmost state from open call it x;
+            7.	If x is a goal then return success
+            8.	Else
+            9.	Begin
+            10.	Generate children of x;
+            11.	Put x on closed;
+            12.	Put children on right end of open;
+            13.	End
+            14.	End
+            15.	Return(failure)
+            16.	End 
         */
 
-        // Initialize Component
         Queue<State> openList = new LinkedList<State>();
         Queue<State> closedList = new LinkedList<State>();
+        // Initialize Component
         ArrayList<State> answer = new ArrayList<>();
 
         int idState=1;
@@ -86,7 +86,8 @@ public class Main{
                         }
                         System.out.println("|");
                     }
-                    System.out.println("-----------------");
+                    System.out.print("-----------------");
+                    System.out.println(answer.get(i).getIdState());
                 }
                 
                 System.out.println("Solution Found!");
@@ -126,7 +127,7 @@ public class Main{
 
                 // Move right
                 if(blankPos != 2 && blankPos != 5 && blankPos != 8){
-                    // if blank position is not on the leftmost column
+                    // if blank position is not on the rightmost column
                     String newState = currentState;
                     boolean recurring = false;
                     idState++;
@@ -151,7 +152,7 @@ public class Main{
                                
                 // Move up
                 if(blankPos != 0 && blankPos != 1 && blankPos != 2){
-                    // if blank position is not on the leftmost column
+                    // if blank position is not on the upmost column
                     String newState = currentState;
                     boolean recurring = false;
                     idState++;
@@ -177,7 +178,7 @@ public class Main{
                 
                 // Move down
                 if(blankPos != 6 && blankPos != 7 && blankPos != 8){
-                    // if blank position is not on the leftmost column
+                    // if blank position is not on the bottom column
                     String newState = currentState;
                     boolean recurring = false;
                     idState++;
